@@ -9,7 +9,7 @@ const robotoSans = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Hệ thống nhập/xuấy dữ liệu giám sát",
+  title: "Hệ thống nhập/xuất dữ liệu giám sát",
   description: "Monitoring Data Import/Export System",
 };
 
@@ -20,9 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${robotoSans.variable} antialiased`}
-      >
+      <body className={`${robotoSans.variable} antialiased`}>
         {children}
       </body>
     </html>
