@@ -2,16 +2,26 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import {
-  PiUserCirclePlus,
+  PiInfoBold,
   PiSignIn,
   PiMagnifyingGlass,
   PiFloppyDisk,
 } from "react-icons/pi";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"operational" | "quality">(
     "operational"
   );
+  const router = useRouter();
+
+  const isLoggedIn = Cookies.get("isLoggedIn") === "true";
+
+  const handleLogout = () => {
+    Cookies.remove("isLoggedIn", { path: "/" });
+    router.push("/login");
+  };
 
   // Thêm options cho select
   const constructionTypes = [
@@ -65,13 +75,22 @@ export default function Home() {
           {/* Auth Buttons */}
           <div className="flex items-center space-x-4">
             <button className="px-4 py-2 bg-white text-[#035291] rounded-md font-medium hover:bg-opacity-90 transition-colors flex items-center space-x-2">
-              <PiUserCirclePlus className="text-xl" />
-              <span>ĐĂNG KÝ</span>
+              <PiInfoBold className="text-xl" />
+              <span>GIỚI THIỆU</span>
             </button>
-            <button className="px-4 py-2 border-white text-white rounded-md font-medium hover:bg-[#193f8f] hover:text-[#fff] transition-colors flex items-center space-x-2 bg-[#0052d3]">
-              <PiSignIn className="text-xl" />
-              <span>ĐĂNG NHẬP</span>
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-red-600 hover:text-white transition-colors flex items-center space-x-2 bg-red-500"
+              >
+                <span>ĐĂNG XUẤT</span>
+              </button>
+            ) : (
+              <button className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-[#193f8f] hover:text-[#fff] transition-colors flex items-center space-x-2 bg-[#0052d3]">
+                <PiSignIn className="text-xl" />
+                <span>ĐĂNG NHẬP</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
