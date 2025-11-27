@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { API_BASE_URL } from '../../config';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -10,17 +11,24 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      // Thực hiện call API đăng nhập ở đây
-      // Đây là mock data, bạn cần thay thế bằng API thật
-      if (username === 'admin' && password === 'admin') {
-        // Lưu trạng thái đăng nhập vào cookie
+      const response = await fetch(`${API_BASE_URL}/authen/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Username: username, Password: password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming the API returns a token or similar data
         Cookies.set('isLoggedIn', 'true', { path: '/' });
-        // Chuyển hướng về trang chủ
         router.push('/');
       } else {
-        alert('Sai tên đăng nhập hoặc mật khẩu!');
+        const errorData = await response.json();
+        alert(errorData.message || 'Sai tên đăng nhập hoặc mật khẩu!');
       }
     } catch (error) {
       console.error('Lỗi đăng nhập:', error);

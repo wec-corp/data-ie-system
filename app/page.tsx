@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   PiInfoBold,
@@ -9,11 +9,15 @@ import {
 } from "react-icons/pi";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { fetchConstructionList } from "../utils/api";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"operational" | "quality">(
     "operational"
   );
+  const [constructionNames, setConstructionNames] = useState<
+    { value: string; label: string }[]
+  >([]);
   const router = useRouter();
 
   const isLoggedIn = Cookies.get("isLoggedIn") === "true";
@@ -22,19 +26,6 @@ export default function Home() {
     Cookies.remove("isLoggedIn", { path: "/" });
     router.push("/login");
   };
-
-  // Thêm options cho select
-  const constructionTypes = [
-    { value: "NUOC_MAT", label: "NƯỚC MẶT" },
-    { value: "NUOC_DUOI_DAT", label: "NƯỚC DƯỚI ĐẤT" },
-    { value: "XA_THAI", label: "XẢ THẢI" },
-  ];
-
-  const constructionNames = [
-    { value: "cong_trinh_1", label: "Công trình 1" },
-    { value: "cong_trinh_2", label: "Công trình 2" },
-    { value: "cong_trinh_3", label: "Công trình 3" },
-  ];
 
   // Sửa lại mảng parameters, thay đổi các unit có chứa m3/s
   const parameters = [
@@ -50,6 +41,32 @@ export default function Home() {
     { id: 10, name: "DỰ KIẾN LƯU LƯỢNG HẠ DU", value: "DUKIENLUULUONGHADU", unit: "m³/s" },
     { id: 11, name: "MỰC NƯỚC HỒ DỰ KIẾN 12 GIỜ", value: "MUCNUOCHODUKIEN12GIO", unit: "m" },
   ];
+
+  useEffect(() => {
+    const loadConstructionNames = async () => {
+      const params = {
+        TypeOfConstructionId: 0,
+        LicenseId: -1,
+        ProvinceId: 0,
+        DistrictId: 0,
+        CommuneId: 0,
+        BasinId: -1,
+        StartDate: -1,
+        Status: true,
+        LicensingAuthorities: -1,
+        Keyword: '',
+        PageIndex: 1,
+        PageSize: 0,
+        DamType: '',
+      };
+
+      const constructionNames = await fetchConstructionList(params);
+      console.log(constructionNames);
+      setConstructionNames(constructionNames);
+    };
+
+    loadConstructionNames();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col font-sans">
@@ -79,10 +96,7 @@ export default function Home() {
               <span>GIỚI THIỆU</span>
             </button>
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-red-600 hover:text-white transition-colors flex items-center space-x-2 bg-red-500"
-              >
+              <button onClick={handleLogout} className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-red-600 hover:text-white transition-colors flex items-center space-x-2 bg-red-500">
                 <span>ĐĂNG XUẤT</span>
               </button>
             ) : (
@@ -101,23 +115,6 @@ export default function Home() {
           <div className="bg-white p-6 rounded-lg shadow-md">
             {/* Existing search form */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              {/* Loại công trình */}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Loại công trình
-                </label>
-                <select
-                  defaultValue=""
-                  className="w-full text-black text-sm p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">---Chọn loại công trình---</option>
-                  {constructionTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               {/* Tên công trình */}
               <div className="flex flex-col gap-2">
@@ -144,7 +141,7 @@ export default function Home() {
             </div>
 
             {/* New data input form */}
-            <div className="mt-8 border-t pt-5">
+            <div className="mt-8 border-t border-slate-400 pt-5">
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 block mb-2">
                   Thời gian nhập dữ liệu
@@ -157,7 +154,7 @@ export default function Home() {
 
               {/* Tabs */}
               <div className="mb-4">
-                <div className="flex space-x-2 border-b">
+                <div className="flex space-x-2 border-b border-slate-400">
                   <button
                     onClick={() => setActiveTab("operational")}
                     className={`px-4 py-2 -mb-px rounded-t-md ${
