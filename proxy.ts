@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  // Kiểm tra nếu người dùng đang truy cập trang chủ
+export function proxy(request: NextRequest) {
+  // Check if the user is logged in when accessing the homepage
   if (request.nextUrl.pathname === '/') {
-    // Lấy trạng thái đăng nhập từ localStorage
     const isLoggedIn = request.cookies.get('isLoggedIn')?.value;
 
-    // Nếu chưa đăng nhập, chuyển hướng về trang login
     if (!isLoggedIn) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
-  // Cho phép tiếp tục nếu đã đăng nhập hoặc đang ở trang login
+  // Continue to the requested page
   return NextResponse.next();
 }
 

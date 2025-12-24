@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../config';
 
-const API_URL = API_BASE_URL || 'http://localhost:3000';
-
 export const fetchConstructionList = async (params: {
   TypeOfConstructionId?: number | string;
   LicenseId?: number | string;
@@ -19,7 +17,7 @@ export const fetchConstructionList = async (params: {
   DamType?: number | string;
 }) => {
   try {
-    const response = await axios.get('/Construction/list', {
+    const response = await axios.get(`${API_BASE_URL}/Construction/list`, {
       params,
       withCredentials: true,
     });
