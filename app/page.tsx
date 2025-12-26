@@ -9,7 +9,7 @@ import {
 } from "react-icons/pi";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { fetchConstructionList } from "../utils/api";
+import { API_BASE_URL } from "../config";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"operational" | "quality">(
@@ -20,7 +20,11 @@ export default function Home() {
   >([]);
   const router = useRouter();
 
-  const isLoggedIn = Cookies.get("isLoggedIn") === "true";
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsLoggedIn(Cookies.get("isLoggedIn") === "true");
+  }, []);
 
   const handleLogout = () => {
     Cookies.remove("isLoggedIn", { path: "/" });
@@ -54,15 +58,34 @@ export default function Home() {
         StartDate: -1,
         Status: true,
         LicensingAuthorities: -1,
-        Keyword: '',
+        Keyword: "",
         PageIndex: 1,
         PageSize: 0,
-        DamType: '',
+        DamType: "",
       };
 
-      const constructionNames = await fetchConstructionList(params);
-      console.log(constructionNames);
-      setConstructionNames(constructionNames);
+      try {
+        const url = new URL(`${API_BASE_URL}/Construction/list`);
+        Object.entries(params).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) url.searchParams.append(k, String(v));
+        });
+
+        const resp = await fetch(url.toString(), {
+          method: "GET",
+        });
+        console.log(resp);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const names = (data || []).map((item: any) => ({
+          value: item.ConstructionName,
+          label: item.ConstructionName,
+        }));
+        
+        setConstructionNames(names);
+      } catch (err) {
+        console.error("Error loading construction names:", err);
+        setConstructionNames([]);
+      }
     };
 
     loadConstructionNames();
@@ -95,14 +118,14 @@ export default function Home() {
               <PiInfoBold className="text-xl" />
               <span>GIỚI THIỆU</span>
             </button>
-            {isLoggedIn ? (
+            {isLoggedIn === null ? null : isLoggedIn ? (
               <button onClick={handleLogout} className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-red-600 hover:text-white transition-colors flex items-center space-x-2 bg-red-500">
-                <span>ĐĂNG XUẤT</span>
+                ĐĂNG XUẤT
               </button>
             ) : (
               <button className="cursor-pointer px-4 py-2 border-white text-white rounded-md font-medium hover:bg-[#193f8f] hover:text-[#fff] transition-colors flex items-center space-x-2 bg-[#0052d3]">
                 <PiSignIn className="text-xl" />
-                <span>ĐĂNG NHẬP</span>
+                ĐĂNG NHẬP
               </button>
             )}
           </div>
